@@ -1,0 +1,24 @@
+{
+    "name": "yx1hlqbk/paynow",
+    "description": "",
+    "license": "MIT",
+    "type":   "library",
+    "authors": [
+        {
+            "name": "Ian Liao",
+            "email": "yx1hlqbk@gmail.com"
+        }
+    ],
+    "require": {
+        "guzzlehttp/guzzle": "^7.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Ian\\PayNow\\": "src"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "prefer-stable": true
+}
