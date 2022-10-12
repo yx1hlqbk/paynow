@@ -69,12 +69,13 @@ class PayNowCash
      * 
      * @param string $orderNo
      * @param string $totalPrice
+     * @param string $TranStatus
      * 
      * @return string
      */
-    public function createPassCode($orderNo, $totalPrice)
+    public function createPassCode($orderNo, $totalPrice, $TranStatus = '')
     {
-        return strtoupper(sha1($this->mem_cid . $OrderNo . $totalPrice . $this->mem_password, false));
+        return strtoupper(sha1($this->mem_cid . $OrderNo . $totalPrice . $this->mem_password . $TranStatus, false));
     }
 
     /**
@@ -102,7 +103,7 @@ class PayNowCash
             <input type="hidden" name="PayType" value="' . $data['PayType'] . '">
             <input type="hidden" name="EPT" value="1">';
 
-        if ($data['type'] == '02') {
+        if ($data['PayType'] == '03') {
             $content .= '<input type="hidden" name="AtmRespost" value="' . $data['AtmRespost'] . '">';
         }
         
@@ -121,22 +122,75 @@ class PayNowCash
     /**
      * 回傳處理
      * 
-     * @param array $data
-     * 
-     * @return void
+     * @return array
      */
     public function callBack()
     {
-        $BuysafeNo = $_POST['BuysafeNo'] ?? '';
-        $PassCode = $_POST['PassCode'] ?? '';
-        $OrderNo = $_POST['OrderNo'] ?? '';
-        $TranStatus = $_POST['TranStatus'] ?? '';
-        $ErrDesc = $_POST['ErrDesc'] ?? '';
-        $TotalPrice = $_POST['TotalPrice'] ?? '';
-        $Note1 = $_POST['Note1'] ?? '';
-        $Note2 = $_POST['Note2'] ?? '';
         $PayType = $_POST['PayType'] ?? '';
-        $pan_no4 = $_POST['pan_no4'] ?? '';
-        $Card_Foreign = $_POST['Card_Foreign'] ?? '';
+        if (in_array($PayType, ['01', '02', '09'])) {
+            // 信用卡 01 | WebATN 02 | 銀聯 09
+            $data = [
+                'WebNo' => $_POST['WebNo'] ?? '',
+                'BuysafeNo' => $_POST['BuysafeNo'] ?? '',
+                'PassCode' => $_POST['PassCode'] ?? '',
+                'OrderNo' => $_POST['OrderNo'] ?? '',
+                'TranStatus' => $_POST['TranStatus'] ?? '',
+                'ErrDesc' => $_POST['ErrDesc'] ?? '',
+                'TotalPrice' => $_POST['TotalPrice'] ?? '',
+                'Note1' => $_POST['Note1'] ?? '',
+                'Note2' => $_POST['Note2'] ?? '',
+                'pan_no4' => $_POST['pan_no4'] ?? '',
+                'Card_Foreign' => $_POST['Card_Foreign'] ?? '',
+            ];
+        } elseif ($PayType == '03') {
+            // 虛擬帳號
+            $data = [
+                'BuysafeNo' => $_POST['BuysafeNo'] ?? '',
+                'OrderNo' => $_POST['OrderNo'] ?? '',
+                'TotalPrice' => $_POST['TotalPrice'] ?? '',
+                'PassCode' => $_POST['PassCode'] ?? '',
+                'IdKey' => $_POST['IdKey'] ?? '',
+                'BankCode' => $_POST['BankCode'] ?? '',
+                'BranchCode' => $_POST['BranchCode'] ?? '',
+                'ATMNo' => $_POST['ATMNo'] ?? '',
+                'NewDate' => $_POST['NewDate'] ?? '',
+                'DueDate' => $_POST['DueDate'] ?? '',
+                'Note1' => $_POST['Note1'] ?? '',
+                'Note2' => $_POST['Note2'] ?? '',
+                'TranStatus' => $_POST['TranStatus'] ?? '',
+            ];
+        } elseif ($PayType == '10') {
+            // 超商條碼
+            $data = [
+                'BuysafeNo' => $_POST['BuysafeNo'] ?? '',
+                'OrderNo' => $_POST['OrderNo'] ?? '',
+                'TotalPrice' => $_POST['TotalPrice'] ?? '',
+                'PassCode' => $_POST['PassCode'] ?? '',
+                'BarCode1' => $_POST['BarCode1'] ?? '',
+                'BarCode2' => $_POST['BarCode2'] ?? '',
+                'BarCode3' => $_POST['BarCode3'] ?? '',
+                'NewDate' => $_POST['NewDate'] ?? '',
+                'DueDate' => $_POST['DueDate'] ?? '',
+                'TranStatus' => $_POST['TranStatus'] ?? '',
+            ];
+        } elseif ($PayType == '05') {
+            // ibon/FamiPort
+            $data = [
+                'BuysafeNo' => $_POST['BuysafeNo'] ?? '',
+                'OrderNo' => $_POST['OrderNo'] ?? '',
+                'TotalPrice' => $_POST['TotalPrice'] ?? '',
+                'IdKey' => $_POST['IdKey'] ?? '',
+                'TranStatus' => $_POST['TranStatus'] ?? '',
+                'ErrDesc' => $_POST['ErrDesc'] ?? '',
+                'PassCode' => $_POST['PassCode'] ?? '',
+                'PassCode2' => $_POST['PassCode2'] ?? '',
+                'Note1' => $_POST['Note1'] ?? '',
+                'Note2' => $_POST['Note2'] ?? '',
+            ];
+        }
+
+        $passCode = $this->createPassCode($data['OrderNo'], $data['TotalPrice'], $data['TranStatus']);
+        $data['is_verify'] = $passCode == $data['PassCode'];
+        return $data;
     }
 }

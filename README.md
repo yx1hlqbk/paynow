@@ -29,8 +29,10 @@ use Ian\PayNow\PayNow;
 
 try {
     $PayNow = new PayNow();
-    $cash = $PayNow->invoice('', ''); // 使用發票功能
-
+    $invoice = $PayNow->invoice('', ''); // 使用發票功能
+    // ....
+    
+    $cash = $PayNow->cash('', ''); // 使用金流
     // ....
 } catch (\Throwable $th) {
     echo $th->getMessage();
