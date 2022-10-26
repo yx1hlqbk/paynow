@@ -132,7 +132,6 @@ class HttpProvider
         
         $this->url = $url;
         $this->headers = $headers;
-        
         $this->httpClient = new Client([
             'timeout' =>  $this->timeout
         ]);
@@ -141,21 +140,40 @@ class HttpProvider
     /**
      * 請求 xml
      *
-     * @param $url
-     * @param array $payload
-     * @param string $method
+     * @param string $method => http method
+     * @param string $data => xml data
      * 
      * @return string
      */
     public function requestXml($method, $data)
     {
-        $request = new Request(strtoupper($method), $this->url, [
+        $response = $this->httpClient->send(new Request(strtoupper($method), $this->url, [
             'Content-Type' => 'application/soap+xml;charset=utf-8',
             'Content-Length' => strlen($data)
-        ], $data);
-        $response = $this->httpClient->send($request);
+        ], $data));
 
         // xml parse
         return @\DOMDocument::loadXML($response->getBody()->getContents())->textContent;
+    }
+
+    /**
+     * 請求
+     *
+     * @param string $method => http method
+     * @param string $suffix => url suffix
+     * @param array|null $data
+     * 
+     * @return string
+     */
+    public function request($method, $suffix, $data = null)
+    {
+        if ($method != 'get') {
+            $option = [
+                'form_params' => $data
+            ];
+        }
+
+        $response = $this->httpClient->send(new Request(strtoupper($method), $this->url . $suffix), $option ?? []);
+        return $response->getBody()->getContents();
     }
 }

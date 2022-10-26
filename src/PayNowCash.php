@@ -2,18 +2,8 @@
 
 namespace Ian\PayNow;
 
-use Ian\PayNow\Provider\HttpProvider;
-use Ian\PayNow\Support\Utils;
-
 class PayNowCash
 {
-    /**
-     * http providers
-     * 
-     * @var \Ian\PayNow\Provider\HttpProvider
-     */
-    public $http;
-
     /**
      * 環境
      * 
@@ -50,7 +40,7 @@ class PayNowCash
      * 
      * @param string $mem_cid
      * @param string $mem_password
-     * @param int $env
+     * @param int $env 1:正式 0:測試
      * 
      * @return void
      */
@@ -59,17 +49,15 @@ class PayNowCash
         $this->mem_cid = $mem_cid;
         $this->mem_password = $mem_password;
         $this->env = $env;
-
-        $this->http = new HttpProvider($this->api_url[$this->env]);
     }
 
 
     /**
      * pass code 產生
      * 
-     * @param string $orderNo
-     * @param string $totalPrice
-     * @param string $TranStatus
+     * @param string $orderNo => 訂單編號
+     * @param string $totalPrice => 金額
+     * @param string $TranStatus => 狀態 S:成功 F:失敗
      * 
      * @return string
      */
@@ -103,18 +91,24 @@ class PayNowCash
             <input type="hidden" name="PayType" value="' . $data['PayType'] . '">
             <input type="hidden" name="EPT" value="1">';
 
+        // 虛擬帳號(atm) 1:代表回傳參數給商家 0:不帶入
         if ($data['PayType'] == '03') {
-            $content .= '<input type="hidden" name="AtmRespost" value="' . $data['AtmRespost'] . '">';
+            $content .= '<input type="hidden" name="AtmRespost" value="' . ($data['AtmRespost'] ?? 1) . '">';
         }
         
         // 超商戶款 0:7-11(ibon) | 1: FamiPort(全家) 
         if ($data['PayType'] == '05') {
             $content .= '<input type="hidden" name="CodeType" value="' . $data['CodeType'] . '">';
+            $content .= '<input type="hidden" name="DeadLine" value="' . ($data['DeadLine'] ?? 1) . '">';
+        }
+
+        // 0:中文 1:英文
+        if (isset($data['PayEN'])) {
+            $content .= '<input type="hidden" name="PayEN" value="' . $data['PayEN'] . '">';
         }
         
         return '<form id="paynow" method="post" action="' . $this->api_url[$this->env] . '">
-                    ' . $content . '        
-                    <input type="hidden" name="EPT" value="1">
+                    ' . $content . '
                 </form>
                 <script> document.getElementById("paynow").submit() </script>';
     }
@@ -126,71 +120,76 @@ class PayNowCash
      */
     public function callBack()
     {
-        $PayType = $_POST['PayType'] ?? '';
-        if (in_array($PayType, ['01', '02', '09'])) {
-            // 信用卡 01 | WebATN 02 | 銀聯 09
-            $data = [
-                'WebNo' => $_POST['WebNo'] ?? '',
-                'BuysafeNo' => $_POST['BuysafeNo'] ?? '',
-                'PassCode' => $_POST['PassCode'] ?? '',
-                'OrderNo' => $_POST['OrderNo'] ?? '',
-                'TranStatus' => $_POST['TranStatus'] ?? '',
-                'ErrDesc' => $_POST['ErrDesc'] ?? '',
-                'TotalPrice' => $_POST['TotalPrice'] ?? '',
-                'Note1' => $_POST['Note1'] ?? '',
-                'Note2' => $_POST['Note2'] ?? '',
-                'pan_no4' => $_POST['pan_no4'] ?? '',
-                'Card_Foreign' => $_POST['Card_Foreign'] ?? '',
-            ];
-        } elseif ($PayType == '03') {
-            // 虛擬帳號
-            $data = [
-                'BuysafeNo' => $_POST['BuysafeNo'] ?? '',
-                'OrderNo' => $_POST['OrderNo'] ?? '',
-                'TotalPrice' => $_POST['TotalPrice'] ?? '',
-                'PassCode' => $_POST['PassCode'] ?? '',
-                'IdKey' => $_POST['IdKey'] ?? '',
-                'BankCode' => $_POST['BankCode'] ?? '',
-                'BranchCode' => $_POST['BranchCode'] ?? '',
-                'ATMNo' => $_POST['ATMNo'] ?? '',
-                'NewDate' => $_POST['NewDate'] ?? '',
-                'DueDate' => $_POST['DueDate'] ?? '',
-                'Note1' => $_POST['Note1'] ?? '',
-                'Note2' => $_POST['Note2'] ?? '',
-                'TranStatus' => $_POST['TranStatus'] ?? '',
-            ];
-        } elseif ($PayType == '10') {
-            // 超商條碼
-            $data = [
-                'BuysafeNo' => $_POST['BuysafeNo'] ?? '',
-                'OrderNo' => $_POST['OrderNo'] ?? '',
-                'TotalPrice' => $_POST['TotalPrice'] ?? '',
-                'PassCode' => $_POST['PassCode'] ?? '',
-                'BarCode1' => $_POST['BarCode1'] ?? '',
-                'BarCode2' => $_POST['BarCode2'] ?? '',
-                'BarCode3' => $_POST['BarCode3'] ?? '',
-                'NewDate' => $_POST['NewDate'] ?? '',
-                'DueDate' => $_POST['DueDate'] ?? '',
-                'TranStatus' => $_POST['TranStatus'] ?? '',
-            ];
-        } elseif ($PayType == '05') {
-            // ibon/FamiPort
-            $data = [
-                'BuysafeNo' => $_POST['BuysafeNo'] ?? '',
-                'OrderNo' => $_POST['OrderNo'] ?? '',
-                'TotalPrice' => $_POST['TotalPrice'] ?? '',
-                'IdKey' => $_POST['IdKey'] ?? '',
-                'TranStatus' => $_POST['TranStatus'] ?? '',
-                'ErrDesc' => $_POST['ErrDesc'] ?? '',
-                'PassCode' => $_POST['PassCode'] ?? '',
-                'PassCode2' => $_POST['PassCode2'] ?? '',
-                'Note1' => $_POST['Note1'] ?? '',
-                'Note2' => $_POST['Note2'] ?? '',
-            ];
+        $post = !empty($_POST) ? $_POST : json_decode(file_get_contents("php://input"), true);
+        if (!empty($post)) {
+            $PayType = $post['PayType'] ?? '';
+            if (in_array($PayType, ['01', '02', '09'])) {
+                // 信用卡 01 | WebATN 02 | 銀聯 09
+                $data = [
+                    'WebNo' => $post['WebNo'] ?? '',
+                    'BuysafeNo' => $post['BuysafeNo'] ?? '',
+                    'PassCode' => $post['PassCode'] ?? '',
+                    'OrderNo' => $post['OrderNo'] ?? '',
+                    'TranStatus' => $post['TranStatus'] ?? '',
+                    'ErrDesc' => $post['ErrDesc'] ?? '',
+                    'TotalPrice' => $post['TotalPrice'] ?? '',
+                    'Note1' => $post['Note1'] ?? '',
+                    'Note2' => $post['Note2'] ?? '',
+                    'pan_no4' => $post['pan_no4'] ?? '',
+                    'Card_Foreign' => $post['Card_Foreign'] ?? '',
+                ];
+            } elseif ($PayType == '03') {
+                // 虛擬帳號
+                $data = [
+                    'BuysafeNo' => $post['BuysafeNo'] ?? '',
+                    'OrderNo' => $post['OrderNo'] ?? '',
+                    'TotalPrice' => $post['TotalPrice'] ?? '',
+                    'PassCode' => $post['PassCode'] ?? '',
+                    'IdKey' => $post['IdKey'] ?? '',
+                    'BankCode' => $post['BankCode'] ?? '',
+                    'BranchCode' => $post['BranchCode'] ?? '',
+                    'ATMNo' => $post['ATMNo'] ?? '',
+                    'NewDate' => $post['NewDate'] ?? '',
+                    'DueDate' => $post['DueDate'] ?? '',
+                    'Note1' => $post['Note1'] ?? '',
+                    'Note2' => $post['Note2'] ?? '',
+                    'TranStatus' => $post['TranStatus'] ?? '',
+                ];
+            } elseif ($PayType == '10') {
+                // 超商條碼
+                $data = [
+                    'BuysafeNo' => $post['BuysafeNo'] ?? '',
+                    'OrderNo' => $post['OrderNo'] ?? '',
+                    'TotalPrice' => $post['TotalPrice'] ?? '',
+                    'PassCode' => $post['PassCode'] ?? '',
+                    'BarCode1' => $post['BarCode1'] ?? '',
+                    'BarCode2' => $post['BarCode2'] ?? '',
+                    'BarCode3' => $post['BarCode3'] ?? '',
+                    'NewDate' => $post['NewDate'] ?? '',
+                    'DueDate' => $post['DueDate'] ?? '',
+                    'TranStatus' => $post['TranStatus'] ?? '',
+                ];
+            } elseif ($PayType == '05') {
+                // ibon/FamiPort
+                $data = [
+                    'BuysafeNo' => $post['BuysafeNo'] ?? '',
+                    'OrderNo' => $post['OrderNo'] ?? '',
+                    'TotalPrice' => $post['TotalPrice'] ?? '',
+                    'IdKey' => $post['IdKey'] ?? '',
+                    'TranStatus' => $post['TranStatus'] ?? '',
+                    'ErrDesc' => $post['ErrDesc'] ?? '',
+                    'PassCode' => $post['PassCode'] ?? '',
+                    'PassCode2' => $post['PassCode2'] ?? '',
+                    'Note1' => $post['Note1'] ?? '',
+                    'Note2' => $post['Note2'] ?? '',
+                ];
+            }
+    
+            $passCode = $this->createPassCode($data['OrderNo'], $data['TotalPrice'], $data['TranStatus']);
+            $data['is_verify'] = $passCode == ($data['PassCode'] ?? '');
+            return $data;
+        } else {
+            return [];
         }
-
-        $passCode = $this->createPassCode($data['OrderNo'], $data['TotalPrice'], $data['TranStatus']);
-        $data['is_verify'] = $passCode == $data['PassCode'];
-        return $data;
     }
 }

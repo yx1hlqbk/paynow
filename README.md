@@ -8,6 +8,7 @@
 
 - 發票 v1.5
 - 金流 v1.7.0.4
+- 物流 v2.4
 <!-- - 物流 -->
 
 ## 安裝
@@ -33,6 +34,9 @@ try {
     // ....
     
     $cash = $PayNow->cash('', ''); // 使用金流
+    // ....
+
+    $logistic = $PayNow->logistic('', ''); // 使用物流
     // ....
 } catch (\Throwable $th) {
     echo $th->getMessage();

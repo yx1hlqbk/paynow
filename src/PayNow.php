@@ -16,7 +16,7 @@ class PayNow
     /**
      * 初始化
      * 
-     * @param int $env
+     * @param int $env => 環境 1:正式 0:測試
      * 
      * @return void
      */
@@ -62,4 +62,23 @@ class PayNow
 
         return new PayNowInvoice($mem_cid, $mem_password, $this->env);
     }
+
+    /**
+     * 物流功能
+     *
+     * @param string $mem_cid
+     * @param string $mem_password
+     *
+     * @return \Ian\PayNow\PayNowInvoice
+     * 
+     * @throws \Ian\PayNow\Exception\PayNowException
+     */
+    public function logistic($mem_cid = '', $mem_password = '')
+    {
+        if (empty($mem_cid) || empty($mem_password)) {
+            throw new \PayNowException('填寫商戶資訊');
+        }
+
+        return new PayNowLogistic($mem_cid, $mem_password, $this->env);
+    }   
 }

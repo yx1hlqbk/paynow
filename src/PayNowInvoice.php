@@ -59,7 +59,7 @@ class PayNowInvoice
      * 
      * @param string $mem_cid
      * @param string $mem_password
-     * @param int $env
+     * @param int $env 1:正式 0:測試
      * 
      * @return void
      */
@@ -121,15 +121,15 @@ class PayNowInvoice
         $csvStr = $this->dataMerge($data);
 
         $xml = '<?xml version="1.0" encoding="utf-8"?>
-        <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
-            <soap12:Body>
-                <Invoice_PatchData_Check xmlns="' . $this->xmlns[$this->env] . '">
-                    <mem_cid>' . $this->mem_cid . '</mem_cid>
-                    <mem_password>' . $this->mem_password . '</mem_password>
-                    <csvStr>' . urlencode(base64_encode($csvStr)) . '</csvStr>
-                </Invoice_PatchData_Check>
-            </soap12:Body>
-        </soap12:Envelope>';
+                <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
+                    <soap12:Body>
+                        <Invoice_PatchData_Check xmlns="' . $this->xmlns[$this->env] . '">
+                            <mem_cid>' . $this->mem_cid . '</mem_cid>
+                            <mem_password>' . $this->mem_password . '</mem_password>
+                            <csvStr>' . urlencode(base64_encode($csvStr)) . '</csvStr>
+                        </Invoice_PatchData_Check>
+                    </soap12:Body>
+                </soap12:Envelope>';
 
         return $this->http->requestXml('post', $xml);
     }
@@ -146,15 +146,15 @@ class PayNowInvoice
         $csvStr = $this->dataMerge($data);
 
         $xml = '<?xml version="1.0" encoding="utf-8"?>
-        <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
-            <soap12:Body>
-                <UploadInvoice_Patch xmlns="' . $this->xmlns[$this->env] . '">
-                    <mem_cid>' . $this->mem_cid . '</mem_cid>
-                    <mem_password>' . $this->mem_password . '</mem_password>
-                    <csvStr>' . urlencode(base64_encode($csvStr)) . '</csvStr>
-                </UploadInvoice_Patch>
-            </soap12:Body>
-        </soap12:Envelope>';
+                <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
+                    <soap12:Body>
+                        <UploadInvoice_Patch xmlns="' . $this->xmlns[$this->env] . '">
+                            <mem_cid>' . $this->mem_cid . '</mem_cid>
+                            <mem_password>' . $this->mem_password . '</mem_password>
+                            <csvStr>' . urlencode(base64_encode($csvStr)) . '</csvStr>
+                        </UploadInvoice_Patch>
+                    </soap12:Body>
+                </soap12:Envelope>';
 
         return $this->http->requestXml('post', $xml);
     }
@@ -169,14 +169,14 @@ class PayNowInvoice
     public function cancelInvoice($invoiceNumber)
     {
         $xml = '<?xml version="1.0" encoding="utf-8"?>
-        <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
-            <soap12:Body>
-                <CancelInvoice_I xmlns="' . $this->xmlns[$this->env] . '">
-                    <mem_cid>' . $this->mem_cid . '</mem_cid>
-                    <InvoiceNo>' . $invoiceNumber . '</InvoiceNo>
-                </CancelInvoice_I>
-            </soap12:Body>
-        </soap12:Envelope>';
+                <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
+                    <soap12:Body>
+                        <CancelInvoice_I xmlns="' . $this->xmlns[$this->env] . '">
+                            <mem_cid>' . $this->mem_cid . '</mem_cid>
+                            <InvoiceNo>' . $invoiceNumber . '</InvoiceNo>
+                        </CancelInvoice_I>
+                    </soap12:Body>
+                </soap12:Envelope>';
 
         return $this->http->requestXml('post', $xml);
     }
@@ -191,14 +191,14 @@ class PayNowInvoice
     public function getInvoiceStatus($invoiceNumber)
     {
         $xml = '<?xml version="1.0" encoding="utf-8"?>
-        <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
-            <soap12:Body>
-                <Check_invoice xmlns="' . $this->xmlns[$this->env] . '">
-                    <mem_cid>' . $this->mem_cid . '</mem_cid>
-                    <InvoiceNo>' . $invoiceNumber . '</InvoiceNo>
-                </Check_invoice>
-            </soap12:Body>
-        </soap12:Envelope>';
+                <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
+                    <soap12:Body>
+                        <Check_invoice xmlns="' . $this->xmlns[$this->env] . '">
+                            <mem_cid>' . $this->mem_cid . '</mem_cid>
+                            <InvoiceNo>' . $invoiceNumber . '</InvoiceNo>
+                        </Check_invoice>
+                    </soap12:Body>
+                </soap12:Envelope>';
 
         return $this->http->requestXml('post', $xml);
     }
@@ -213,14 +213,14 @@ class PayNowInvoice
     public function getOrderStatus($orderNumber)
     {
         $xml = '<?xml version="1.0" encoding="utf-8"?>
-        <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
-            <soap12:Body>
-                <Check_invoiceOrder xmlns="' . $this->xmlns[$this->env] . '">
-                    <mem_cid>' . $this->mem_cid . '</mem_cid>
-                    <orderno>' . $orderNumber . '</orderno>
-                </Check_invoiceOrder>
-            </soap12:Body>
-        </soap12:Envelope>';
+                <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
+                    <soap12:Body>
+                        <Check_invoiceOrder xmlns="' . $this->xmlns[$this->env] . '">
+                            <mem_cid>' . $this->mem_cid . '</mem_cid>
+                            <orderno>' . $orderNumber . '</orderno>
+                        </Check_invoiceOrder>
+                    </soap12:Body>
+                </soap12:Envelope>';
 
         return $this->http->requestXml('post', $xml);
     }
@@ -236,14 +236,14 @@ class PayNowInvoice
     public function getInvoiceInfo($invoiceNumber)
     {
         $xml = '<?xml version="1.0" encoding="utf-8"?>
-        <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
-            <soap12:Body>
-                <Invoice_Info xmlns="' . $this->xmlns[$this->env] . '">
-                    <mem_cid>' . $this->mem_cid . '</mem_cid>
-                    <InvoiceNo>' . $invoiceNumber . '</InvoiceNo>
-                </Invoice_Info>
-            </soap12:Body>
-        </soap12:Envelope>';
+                <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
+                    <soap12:Body>
+                        <Invoice_Info xmlns="' . $this->xmlns[$this->env] . '">
+                            <mem_cid>' . $this->mem_cid . '</mem_cid>
+                            <InvoiceNo>' . $invoiceNumber . '</InvoiceNo>
+                        </Invoice_Info>
+                    </soap12:Body>
+                </soap12:Envelope>';
 
         return $this->http->requestXml('post', $xml);
     }
@@ -259,14 +259,14 @@ class PayNowInvoice
     public function getOrderInfo($orderNumber)
     {
         $xml = '<?xml version="1.0" encoding="utf-8"?>
-        <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
-            <soap12:Body>
-                <Invoice_Info xmlns="' . $this->xmlns[$this->env] . '">
-                    <mem_cid>' . $this->mem_cid . '</mem_cid>
-                    <OrderNo>' . $orderNumber . '</OrderNo>
-                </Invoice_Info>
-            </soap12:Body>
-        </soap12:Envelope>';
+                <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
+                    <soap12:Body>
+                        <Invoice_Info xmlns="' . $this->xmlns[$this->env] . '">
+                            <mem_cid>' . $this->mem_cid . '</mem_cid>
+                            <OrderNo>' . $orderNumber . '</OrderNo>
+                        </Invoice_Info>
+                    </soap12:Body>
+                </soap12:Envelope>';
 
         return $this->http->requestXml('post', $xml);
     }
@@ -282,14 +282,14 @@ class PayNowInvoice
     public function getInvoiceUrl($invoiceNumber)
     {
         $xml = '<?xml version="1.0" encoding="utf-8"?>
-        <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
-            <soap12:Body>
-                <Get_InvoiceURL_I xmlns="' . $this->xmlns[$this->env] . '">
-                    <mem_cid>' . $this->mem_cid . '</mem_cid>
-                    <InvoiceNo>' . $invoiceNumber . '</InvoiceNo>
-                </Get_InvoiceURL_I>
-            </soap12:Body>
-        </soap12:Envelope>';
+                <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
+                    <soap12:Body>
+                        <Get_InvoiceURL_I xmlns="' . $this->xmlns[$this->env] . '">
+                            <mem_cid>' . $this->mem_cid . '</mem_cid>
+                            <InvoiceNo>' . $invoiceNumber . '</InvoiceNo>
+                        </Get_InvoiceURL_I>
+                    </soap12:Body>
+                </soap12:Envelope>';
 
         return $this->http->requestXml('post', $xml);
     }
@@ -305,14 +305,14 @@ class PayNowInvoice
     public function getOrderUrl($orderNumber)
     {
         $xml = '<?xml version="1.0" encoding="utf-8"?>
-        <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
-            <soap12:Body>
-                <Get_InvoiceURL_O xmlns="' . $this->xmlns[$this->env] . '">
-                    <mem_cid>' . $this->mem_cid . '</mem_cid>
-                    <OrderNo>' . $orderNumber . '</OrderNo>
-                </Get_InvoiceURL_O>
-            </soap12:Body>
-        </soap12:Envelope>';
+                <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
+                    <soap12:Body>
+                        <Get_InvoiceURL_O xmlns="' . $this->xmlns[$this->env] . '">
+                            <mem_cid>' . $this->mem_cid . '</mem_cid>
+                            <OrderNo>' . $orderNumber . '</OrderNo>
+                        </Get_InvoiceURL_O>
+                    </soap12:Body>
+                </soap12:Envelope>';
 
         return $this->http->requestXml('post', $xml);
     }
